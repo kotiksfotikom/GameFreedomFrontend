@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>GameFreedom Каталог</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
+        .game-card { border: 1px solid #333; padding: 15px; margin-bottom: 15px; background: #1e1e1e; border-radius: 8px; }
+        .price { color: #4caf50; font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>Каталог ігор (Тест CORS)</h1>
+    <div id="games-container">Завантаження даних з API</div>
+
+    <script>
+        fetch('http://127.0.0.1:8000/api/games/')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('games-container');
+                container.innerHTML = ''; // Очищаємо текст завантаження
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p>Ігор поки немає. Додайте їх через API або адмінку.</p>';
+                    return;
+                }
+
+                data.forEach(game => {
+                    container.innerHTML += `
+                        <div class="game-card">
+                            <h2>${game.title}</h2>
+                            <p class="price">$${game.price}</p>
+                            <p>${game.description || 'Опису поки немає'}</p>
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => {
+                document.getElementById('games-container').innerHTML =
+                    '<p style="color: red;">Помилка</p>';
+            });
+    </script>
+</body>
+</html>
