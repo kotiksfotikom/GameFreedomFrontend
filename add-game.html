@@ -68,9 +68,9 @@
                 release_date: document.getElementById('release_date').value,
                 price: document.getElementById('price').value,
                 rating: document.getElementById('rating').value,
-                developer: Number(document.getElementById('developer').value),
-                publisher: Number(document.getElementById('publisher').value),
-                genres: [Number(document.getElementById('genre').value)]
+                developer_id: Number(document.getElementById('developer').value),
+                publisher_id: Number(document.getElementById('publisher').value),
+                genre_ids: [Number(document.getElementById('genre').value)]
             };
 
             const response = await authFetch(`${API_URL}/api/games/`, {
