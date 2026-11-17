@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Логін — GameFreedom</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+    <div class="game-card">
+        <h1>Вхід в акаунт</h1>
+        <form id="login-form">
+            <label>Username</label>
+            <input type="text" id="username" required>
+
+            <label>Password</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Увійти</button>
+        </form>
+        <p id="error-msg" class="error"></p>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        if (isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+        renderNavbar();
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch(`${API_URL}/api/accounts/login/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+                localStorage.setItem('username', username);
+
+                const params = new URLSearchParams(window.location.search);
+                window.location.href = params.get('next') || 'index.html';
+            } else {
+                document.getElementById('error-msg').innerText = data.detail || 'Невірний логін або пароль';
+            }
+        });
+    </script>
+</body>
+</html>

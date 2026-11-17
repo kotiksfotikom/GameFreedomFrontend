@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Додати гру — GameFreedom</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav id="navbar"></nav>
+    <div class="game-card">
+        <h1>Додати нову гру</h1>
+        <form id="game-form">
+            <label>Назва гри</label>
+            <input type="text" id="title" required>
+
+            <label>Опис</label>
+            <textarea id="description" rows="3"></textarea>
+
+            <label>Дата релізу</label>
+            <input type="date" id="release_date" required>
+
+            <label>Ціна ($)</label>
+            <input type="number" step="0.01" id="price" required>
+
+            <label>Рейтинг (0 - 10)</label>
+            <input type="number" step="0.1" id="rating" required>
+
+            <label>Розробник</label>
+            <select id="developer" required></select>
+
+            <label>Видавець</label>
+            <select id="publisher" required></select>
+
+            <label>Жанр</label>
+            <select id="genre" required></select>
+
+            <button type="submit">Зберегти гру</button>
+        </form>
+        <pre id="result" class="error"></pre>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        if (!isLoggedIn()) {
+            window.location.href = 'login.html?next=add-game.html';
+        }
+        renderNavbar();
+
+        async function loadOptions() {
+            const [devs, pubs, genres] = await Promise.all([
+                fetch(`${API_URL}/api/developers/`).then(r => r.json()),
+                fetch(`${API_URL}/api/publishers/`).then(r => r.json()),
+                fetch(`${API_URL}/api/genres/`).then(r => r.json())
+            ]);
+
+            document.getElementById('developer').innerHTML = devs.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            document.getElementById('publisher').innerHTML = pubs.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            document.getElementById('genre').innerHTML = genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+        }
+
+        loadOptions();
+
+        document.getElementById('game-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                release_date: document.getElementById('release_date').value,
+                price: document.getElementById('price').value,
+                rating: document.getElementById('rating').value,
+                developer: Number(document.getElementById('developer').value),
+                publisher: Number(document.getElementById('publisher').value),
+                genres: [Number(document.getElementById('genre').value)]
+            };
+
+            const response = await authFetch(`${API_URL}/api/games/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (response.status === 201) {
+                alert('Гру успішно додано!');
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+            }
+        });
+    </script>
+</body>
+</html>
